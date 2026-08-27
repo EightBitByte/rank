@@ -1,0 +1,2 @@
+pnpm commitlint --edit $1
+pnpm devmoji --edit $1 --config devmoji.config.cjs
