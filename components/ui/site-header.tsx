@@ -1,3 +1,5 @@
+import packageJson from "@/package.json";
+
 export function SiteHeader() {
   return (
     <header className="flex items-center justify-between py-10">
@@ -6,7 +8,7 @@ export function SiteHeader() {
           RANK
         </span>
         <span className="rounded-full bg-[#111] px-[9px] py-[3px] font-display text-xs font-bold text-white">
-          v0.1.2
+          v{packageJson.version}
         </span>
       </div>
       <a
