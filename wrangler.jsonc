@@ -19,7 +19,7 @@
       "binding": "DB",
       "database_name": "ranking-db",
       "database_id": "3b751874-25b8-4175-bea3-bf5662bec633",
-      "migrations_dir": "drizzle/migrations"
+      "migrations_dir": "server/drizzle/migrations"
     }
   ],
   "ratelimits": [

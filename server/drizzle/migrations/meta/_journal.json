@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1787768911080,
+      "tag": "0000_natural_moon_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787852386698,
+      "tag": "0001_demonic_leper_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787854156805,
+      "tag": "0002_fixed_baron_strucker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787858555729,
+      "tag": "0003_next_mikhail_rasputin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1787858910956,
+      "tag": "0004_rename_confidence_to_rd",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1787954030929,
+      "tag": "0005_petite_sebastian_shaw",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `items` ADD `preview_asset_id` integer REFERENCES assets(id);

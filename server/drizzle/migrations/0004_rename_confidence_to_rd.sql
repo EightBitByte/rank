@@ -1,0 +1,1 @@
+ALTER TABLE `elo_records` RENAME COLUMN "confidence" TO "rd";
