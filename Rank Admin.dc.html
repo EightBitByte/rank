@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: oklch(98% 0.012 60); font-family: 'Inter', sans-serif; }
+    a { color: #ff5a1f; text-decoration: none; }
+    a:hover { color: #d94815; text-decoration: underline; }
+    input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.35); }
+  </style>
+</helmet>
+
+<div style="max-width: 1180px; margin: 0 auto; padding: 0 32px 100px; color: oklch(20% 0.01 60);">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 40px 0 28px;">
+    <div style="display: flex; align-items: baseline; gap: 10px;">
+      <span style="font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: -0.5px;">RANK</span>
+      <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 12px; background: #111; color: #fff; padding: 3px 9px; border-radius: 100px;">admin</span>
+    </div>
+    <a href="#" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; color: oklch(20% 0.01 60); opacity: 0.55;">← Back to leaderboard</a>
+  </header>
+
+  <section style="padding: 4px 0 40px;">
+    <h1 style="font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 40px; line-height: 1.05; letter-spacing: -1px; margin: 0 0 10px;">Run the whole show.</h1>
+    <p style="font-size: 16px; opacity: 0.7; margin: 0; max-width: 560px;">Add new contenders, settle head-to-heads, and clean out the roster.</p>
+  </section>
+
+  <nav style="display: flex; gap: 10px; padding-bottom: 32px;">
+    <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="3">
+      <div onClick="{{ tab.onClick }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; padding: 12px 22px; border-radius: 100px; cursor: pointer; background: {{ tab.bg }}; color: {{ tab.color }};">{{ tab.label }}</div>
+    </sc-for>
+  </nav>
+
+  <!-- ADD ITEM -->
+  <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ true }}">
+    <section style="display: flex; flex-direction: column; gap: 28px;">
+
+      <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); padding: 28px;">
+        <h2 style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 22px; margin: 0 0 4px;">Pull from an API</h2>
+        <p style="font-size: 14px; opacity: 0.6; margin: 0 0 20px;">Search a source, pick the match, done.</p>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <sc-for list="{{ sourceTypes }}" as="src" hint-placeholder-count="3">
+            <div onClick="{{ src.onClick }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 100px; cursor: pointer; background: {{ src.bg }}; color: {{ src.color }}; border: 2px solid {{ src.border }};">{{ src.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <input value="{{ searchQuery }}" onChange="{{ onSearchChange }}" placeholder="{{ searchPlaceholder }}" style="flex: 1; font-family: 'Inter', sans-serif; font-size: 15px; padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); outline: none;"/>
+          <div onClick="{{ onSearch }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; padding: 14px 26px; border-radius: 12px; background: #ff5a1f; color: #fff; cursor: pointer; white-space: nowrap;">Search {{ searchSourceLabel }}</div>
+        </div>
+
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 18px;">
+            <sc-for list="{{ searchResults }}" as="res" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08);">
+                <div style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 5px, transparent 5px 10px); background-color: rgba(0,0,0,0.03);"></div>
+                <div style="flex: 1;">
+                  <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px;">{{ res.title }}</div>
+                  <div style="font-size: 12px; opacity: 0.5;">{{ res.meta }}</div>
+                </div>
+                <div onClick="{{ res.onAdd }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; padding: 8px 16px; border-radius: 100px; background: #111; color: #fff; cursor: pointer;">Add</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasDraft }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border-radius: 20px; border: 2px solid #ff5a1f; padding: 28px;">
+          <h2 style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 22px; margin: 0 0 4px;">Fill in the details</h2>
+          <p style="font-size: 14px; opacity: 0.6; margin: 0 0 20px;">Pulled from {{ draft.sourceLabel }} — tweak anything before it joins the roster.</p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Title</label>
+              <input value="{{ draft.title }}" onChange="{{ onDraftChange('title') }}" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none;"/>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Category</label>
+              <select value="{{ draft.category }}" onChange="{{ onDraftCategoryChange }}" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none; background: #fff;">
+                <sc-for list="{{ categoryOptions }}" as="opt" hint-placeholder-count="3">
+                  <option value="{{ opt }}">{{ opt }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Starting Elo</label>
+              <input value="{{ draft.elo }}" onChange="{{ onDraftChange('elo') }}" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none;"/>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Source meta</label>
+              <input value="{{ draft.meta }}" onChange="{{ onDraftChange('meta') }}" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none;"/>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
+              <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Notes</label>
+              <textarea value="{{ draft.notes }}" onChange="{{ onDraftChange('notes') }}" placeholder="Anything worth remembering about this one." rows="3" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none; resize: vertical;"></textarea>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 18px;">
+            <div onClick="{{ onDraftConfirm }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; padding: 13px 26px; border-radius: 12px; background: #ff5a1f; color: #fff; cursor: pointer;">Confirm & add to roster</div>
+            <div onClick="{{ onDraftCancel }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; padding: 13px 26px; border-radius: 12px; background: rgba(0,0,0,0.06); cursor: pointer;">Cancel</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); padding: 28px;">
+        <h2 style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 22px; margin: 0 0 4px;">...or add it by hand</h2>
+        <p style="font-size: 14px; opacity: 0.6; margin: 0 0 20px;">For the stuff no API has ever heard of.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Title</label>
+            <input value="{{ manual.title }}" onChange="{{ onManualChange('title') }}" placeholder="e.g. My neighbor's chili" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none;"/>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Category</label>
+            <select value="{{ manual.category }}" onChange="{{ onManualCategoryChange }}" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none; background: #fff;">
+              <sc-for list="{{ categoryOptions }}" as="opt" hint-placeholder-count="3">
+                <option value="{{ opt }}">{{ opt }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
+            <label style="font-size: 12px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.4px;">Notes</label>
+            <textarea value="{{ manual.notes }}" onChange="{{ onManualChange('notes') }}" placeholder="Why does this deserve a ranking? Be honest." rows="3" style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); outline: none; resize: vertical;"></textarea>
+          </div>
+        </div>
+        <div onClick="{{ onManualSubmit }}" style="margin-top: 18px; display: inline-block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; padding: 13px 26px; border-radius: 12px; background: #111; color: #fff; cursor: pointer;">Add to roster</div>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- RUN MATCHUP -->
+  <sc-if value="{{ isMatch }}" hint-placeholder-val="{{ false }}">
+    <section style="display: flex; flex-direction: column; gap: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <p style="font-size: 14px; opacity: 0.6; margin: 0;">Pick a winner. Elo does the rest.</p>
+        <div onClick="{{ onReroll }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 100px; background: rgba(0,0,0,0.06); cursor: pointer;">🎲 New matchup</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center;">
+        <div onClick="{{ matchA.onPick }}" style="cursor: pointer; background: #fff; border-radius: 20px; border: 3px solid {{ matchA.border }}; padding: 28px; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center;">
+          <div style="width: 140px; height: 140px; border-radius: 14px; background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 6px, transparent 6px 12px); background-color: rgba(0,0,0,0.03);"></div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 100px; background: {{ matchA.tagBg }}; color: {{ matchA.tagColor }};">{{ matchA.category }}</div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 20px;">{{ matchA.title }}</div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 15px; opacity: 0.5;">{{ matchA.elo }} elo</div>
+        </div>
+
+        <div style="font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 22px; opacity: 0.25;">VS</div>
+
+        <div onClick="{{ matchB.onPick }}" style="cursor: pointer; background: #fff; border-radius: 20px; border: 3px solid {{ matchB.border }}; padding: 28px; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center;">
+          <div style="width: 140px; height: 140px; border-radius: 14px; background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 6px, transparent 6px 12px); background-color: rgba(0,0,0,0.03);"></div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 100px; background: {{ matchB.tagBg }}; color: {{ matchB.tagColor }};">{{ matchB.category }}</div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 20px;">{{ matchB.title }}</div>
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 15px; opacity: 0.5;">{{ matchB.elo }} elo</div>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasWinner }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: #ff5a1f; padding-top: 4px;">{{ winnerText }}</div>
+      </sc-if>
+    </section>
+  </sc-if>
+
+  <!-- MANAGE / DELETE -->
+  <sc-if value="{{ isManage }}" hint-placeholder-val="{{ false }}">
+    <section style="display: flex; flex-direction: column; gap: 20px;">
+      <input value="{{ deleteQuery }}" onChange="{{ onDeleteQueryChange }}" placeholder="Search the roster by name..." style="font-family: 'Inter', sans-serif; font-size: 15px; padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); outline: none; max-width: 420px;"/>
+
+      <div style="display: flex; flex-direction: column; border-radius: 20px; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); overflow: hidden; border: 1px solid rgba(0,0,0,0.06);">
+        <sc-for list="{{ filteredItems }}" as="item" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; gap: 16px; padding: 14px 22px; border-bottom: 1px solid rgba(0,0,0,0.06);">
+            <div style="width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0; background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 5px, transparent 5px 10px); background-color: rgba(0,0,0,0.03);"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.title }}</div>
+              <div style="display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 100px; background: {{ item.tagBg }}; color: {{ item.tagColor }};">{{ item.category }}</div>
+            </div>
+            <div style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 15px; opacity: 0.6;">{{ item.elo }}</div>
+            <div onClick="{{ item.onDelete }}" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; padding: 8px 16px; border-radius: 100px; background: rgba(220,38,38,0.1); color: #dc2626; cursor: pointer;">Delete</div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 32px; text-align: center; font-size: 14px; opacity: 0.5;">Nothing matches "{{ deleteQuery }}".</div>
+        </sc-if>
+      </div>
+    </section>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const MOVIE_TAG = { tagBg: 'oklch(90% 0.05 250)', tagColor: 'oklch(35% 0.14 250)' };
+const GAME_TAG = { tagBg: 'oklch(90% 0.05 150)', tagColor: 'oklch(32% 0.13 150)' };
+const FOOD_TAG = { tagBg: 'oklch(90% 0.05 39)', tagColor: 'oklch(38% 0.16 39)' };
+const TAGS = { 'Movies & TV': MOVIE_TAG, 'Games': GAME_TAG, 'Restaurants': FOOD_TAG };
+
+const SEED_ITEMS = [
+  { id: 1, title: 'Disco Elysium', category: 'Games', elo: 1842 },
+  { id: 2, title: 'The Grand Budapest Hotel', category: 'Movies & TV', elo: 1798 },
+  { id: 3, title: "Lin's Noodle House", category: 'Restaurants', elo: 1774 },
+  { id: 4, title: "Baldur's Gate 3", category: 'Games', elo: 1751 },
+  { id: 5, title: 'Parasite', category: 'Movies & TV', elo: 1733 },
+  { id: 6, title: 'Kagawa Ramen', category: 'Restaurants', elo: 1690 },
+  { id: 7, title: 'Hades', category: 'Games', elo: 1662 },
+  { id: 8, title: 'Avengers: Endgame', category: 'Movies & TV', elo: 1588 },
+];
+
+const SOURCE_META = {
+  'Movies & TV': { label: 'TMDb', placeholder: 'Search movies & TV shows...' },
+  'Games': { label: 'IGDB', placeholder: 'Search games...' },
+  'Restaurants': { label: 'Google Places', placeholder: 'Search restaurants...' },
+};
+
+const MOCK_RESULTS = {
+  'Movies & TV': [
+    { title: 'Spirited Away', meta: '2001 · Animation' },
+    { title: 'The Dark Knight', meta: '2008 · Action' },
+  ],
+  'Games': [
+    { title: 'Elden Ring', meta: '2022 · Action RPG' },
+    { title: 'Outer Wilds', meta: '2019 · Adventure' },
+  ],
+  'Restaurants': [
+    { title: 'Pizzeria Bianco', meta: 'Phoenix, AZ' },
+    { title: 'Joe\'s Pizza', meta: 'New York, NY' },
+  ],
+};
+
+class Component extends DCLogic {
+  state = {
+    tab: 'add',
+    sourceType: 'Movies & TV',
+    searchQuery: '',
+    searchResults: [],
+    manual: { title: '', category: 'Movies & TV', notes: '' },
+    draft: null,
+    items: SEED_ITEMS,
+    matchIds: [1, 4],
+    picked: null,
+    deleteQuery: '',
+  };
+
+  setTab = (tab) => this.setState({ tab });
+
+  onSourceType = (t) => this.setState({ sourceType: t, searchResults: [] });
+
+  onSearchChange = (e) => this.setState({ searchQuery: e.target.value });
+
+  onSearch = () => {
+    this.setState({ searchResults: MOCK_RESULTS[this.state.sourceType] || [] });
+  };
+
+  addFromResult = (res) => {
+    this.setState((s) => ({
+      draft: {
+        title: res.title,
+        category: s.sourceType,
+        elo: 1200,
+        meta: res.meta || '',
+        notes: '',
+        sourceLabel: SOURCE_META[s.sourceType].label,
+      },
+      searchResults: [],
+      searchQuery: '',
+    }));
+  };
+
+  onDraftChange = (field) => (e) => {
+    const val = e.target.value;
+    this.setState((s) => ({ draft: { ...s.draft, [field]: val } }));
+  };
+
+  onDraftCategoryChange = (e) => {
+    const val = e.target.value;
+    this.setState((s) => ({ draft: { ...s.draft, category: val } }));
+  };
+
+  onDraftConfirm = () => {
+    const { draft } = this.state;
+    if (!draft || !draft.title.trim()) return;
+    const id = Date.now();
+    this.setState((s) => ({
+      items: [...s.items, { id, title: draft.title, category: draft.category, elo: Number(draft.elo) || 1200, notes: draft.notes }],
+      draft: null,
+    }));
+  };
+
+  onDraftCancel = () => this.setState({ draft: null });
+
+  onManualChange = (field) => (e) => {
+    const val = e.target.value;
+    this.setState((s) => ({ manual: { ...s.manual, [field]: val } }));
+  };
+
+  onManualCategoryChange = (e) => {
+    const val = e.target.value;
+    this.setState((s) => ({ manual: { ...s.manual, category: val } }));
+  };
+
+  onManualSubmit = () => {
+    const { manual } = this.state;
+    if (!manual.title.trim()) return;
+    const id = Date.now();
+    this.setState((s) => ({
+      items: [...s.items, { id, title: manual.title, category: manual.category, elo: 1200 }],
+      manual: { title: '', category: 'Movies & TV', notes: '' },
+    }));
+  };
+
+  onReroll = () => {
+    const { items } = this.state;
+    if (items.length < 2) return;
+    const idx = new Set();
+    while (idx.size < 2) idx.add(Math.floor(Math.random() * items.length));
+    const [a, b] = [...idx];
+    this.setState({ matchIds: [items[a].id, items[b].id], picked: null });
+  };
+
+  pickWinner = (winnerId, loserId) => {
+    this.setState((s) => {
+      const items = s.items.map((it) => {
+        if (it.id === winnerId) return { ...it, elo: it.elo + 12 };
+        if (it.id === loserId) return { ...it, elo: it.elo - 12 };
+        return it;
+      });
+      return { items, picked: winnerId };
+    });
+  };
+
+  onDeleteQueryChange = (e) => this.setState({ deleteQuery: e.target.value });
+
+  deleteItem = (id) => this.setState((s) => ({ items: s.items.filter((it) => it.id !== id) }));
+
+  renderVals() {
+    const { tab, sourceType, searchQuery, searchResults, manual, items, matchIds, picked, deleteQuery, draft } = this.state;
+
+    const tabDefs = [
+      { key: 'add', label: 'Add item' },
+      { key: 'match', label: 'Run matchup' },
+      { key: 'manage', label: 'Manage / delete' },
+    ];
+    const tabs = tabDefs.map((t) => ({
+      label: t.label,
+      onClick: () => this.setTab(t.key),
+      bg: tab === t.key ? '#ff5a1f' : 'rgba(0,0,0,0.06)',
+      color: tab === t.key ? '#fff' : 'oklch(20% 0.01 60)',
+    }));
+
+    const sourceTypes = Object.keys(SOURCE_META).map((s) => ({
+      label: s,
+      onClick: () => this.onSourceType(s),
+      bg: sourceType === s ? '#ff5a1f' : 'transparent',
+      color: sourceType === s ? '#fff' : 'oklch(20% 0.01 60)',
+      border: sourceType === s ? '#ff5a1f' : 'rgba(0,0,0,0.15)',
+    }));
+
+    const results = searchResults.map((r) => ({ ...r, onAdd: () => this.addFromResult(r) }));
+
+    const withTags = (it) => ({ ...it, ...(TAGS[it.category] || {}) });
+
+    const [idA, idB] = matchIds;
+    const itemA = items.find((i) => i.id === idA) || items[0];
+    const itemB = items.find((i) => i.id === idB) || items[1];
+    const matchA = itemA && {
+      ...withTags(itemA),
+      onPick: () => this.pickWinner(itemA.id, itemB.id),
+      border: picked === itemA.id ? '#ff5a1f' : 'transparent',
+    };
+    const matchB = itemB && {
+      ...withTags(itemB),
+      onPick: () => this.pickWinner(itemB.id, itemA.id),
+      border: picked === itemB.id ? '#ff5a1f' : 'transparent',
+    };
+
+    const filteredItems = items
+      .filter((it) => it.title.toLowerCase().includes(deleteQuery.toLowerCase()))
+      .map((it) => ({ ...withTags(it), onDelete: () => this.deleteItem(it.id) }));
+
+    return {
+      tabs,
+      isAdd: tab === 'add',
+      isMatch: tab === 'match',
+      isManage: tab === 'manage',
+      sourceTypes,
+      searchQuery,
+      onSearchChange: this.onSearchChange,
+      onSearch: this.onSearch,
+      searchPlaceholder: SOURCE_META[sourceType].placeholder,
+      searchSourceLabel: SOURCE_META[sourceType].label,
+      hasResults: results.length > 0,
+      searchResults: results,
+      manual,
+      onManualChange: this.onManualChange,
+      onManualCategoryChange: this.onManualCategoryChange,
+      onManualSubmit: this.onManualSubmit,
+      categoryOptions: Object.keys(SOURCE_META),
+      hasDraft: !!draft,
+      draft: draft || {},
+      onDraftChange: this.onDraftChange,
+      onDraftCategoryChange: this.onDraftCategoryChange,
+      onDraftConfirm: this.onDraftConfirm,
+      onDraftCancel: this.onDraftCancel,
+      matchA,
+      matchB,
+      onReroll: this.onReroll,
+      hasWinner: !!picked,
+      winnerText: picked ? `${(picked === itemA?.id ? itemA?.title : itemB?.title)} wins. Elo updated.` : '',
+      deleteQuery,
+      onDeleteQueryChange: this.onDeleteQueryChange,
+      filteredItems,
+      noResults: filteredItems.length === 0,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
