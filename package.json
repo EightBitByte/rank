@@ -6,14 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv",
+    "db:generate": "drizzle-kit generate",
+    "db:local-apply": "wrangler d1 migrations apply DB --local",
+    "db:remote-apply": "wrangler d1 migrations apply DB --remote",
     "lint": "biome check",
     "format": "biome format --write",
     "prepare": "husky"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.4",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.5",
     "next": "16.3.3",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.5.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
@@ -23,10 +33,12 @@
     "@types/react-dom": "^19",
     "commitlint": "^21.2.2",
     "devmoji": "^2.3.0",
+    "drizzle-kit": "^0.31.10",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.127.1"
   },
   "packageManager": "pnpm@10.28.1",
   "lint-staged": {
