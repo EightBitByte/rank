@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/d1";
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { createEloRecord } from "@/server/db/elo";
+import { createEloRecord, getComparisonPair, logMatch } from "@/server/db/elo";
 import { createItem, getAllItems } from "@/server/db/items";
 import {
   getMovieDetailsById,
@@ -75,6 +75,36 @@ app.post("/items/new", async (c) => {
   await createEloRecord(db, item.id);
 
   return c.json(item, 201);
+});
+
+// --------------- Comparisons ---------------
+app.get("/compare/next", async (c) => {
+  const { env } = getCloudflareContext();
+  const db = drizzle(env.DB);
+  const pair = await getComparisonPair(db);
+
+  if (!pair) {
+    return c.json({ error: "Not enough items to compare." }, 409);
+  }
+
+  return c.json({ data: pair }, 200);
+});
+
+app.post("/vote", async (c) => {
+  const { env } = getCloudflareContext();
+  const body = await c.req.json<{ winnerId?: number; loserId?: number }>();
+
+  if (typeof body.winnerId !== "number" || typeof body.loserId !== "number") {
+    return c.json(
+      { error: '"winnerId" and "loserId" must both be numbers.' },
+      400,
+    );
+  }
+
+  const db = drizzle(env.DB);
+  await logMatch(db, body.winnerId, body.loserId);
+
+  return c.json({ ok: true }, 200);
 });
 
 // --------------- External ---------------

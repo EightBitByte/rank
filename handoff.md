@@ -19,13 +19,41 @@ Steps 1–3 done and verified end-to-end against local D1:
 - Verified live via `next dev` + curl: auth-gated POST, D1 write, D1 read
   all round-tripped correctly.
 
-Still open (steps 4–6 below): wiring the public leaderboard page to real
-data instead of the `lib/rank-data.ts` mock, adding the Hono RPC client for
-the vote loop, and deleting the old `ranking-api` repo once parity is
-confirmed. Note the standalone API itself doesn't have a `/vote` endpoint
-yet — `db/elo.ts` has `logMatch`/`getComparisonPair` implemented but nothing
-routes to them. That's a feature gap in the original API, not something
-this migration task introduced.
+Backend code was then consolidated under `server/` (`server/db/`,
+`server/external/`, `server/lib/elo.ts`, `server/drizzle/`,
+`server/drizzle.config.ts`) so it isn't scattered loose at repo root next
+to the frontend — only `app/api/[[...route]]/route.ts` stays under `app/`,
+since Next.js requires that. `wrangler.jsonc`'s `migrations_dir` and
+`package.json`'s `db:generate` script were updated to match.
+
+Step 5 (vote loop) done: added `GET /api/compare/next`
+(`getComparisonPair`) and `POST /api/vote` (`logMatch`) — the standalone
+API never actually exposed these despite `server/db/elo.ts` having the
+logic, so this is a small feature addition, not just a migration. No RPC
+client/vote UI built yet since there's no comparison screen in the
+frontend today; only the backend endpoints exist so far, verified live
+(elo/rd update correctly, match logged, 400 on bad body).
+
+Step 4 (partially done, by choice — see below): `app/page.tsx` now pulls
+the leaderboard and recent-activity sections from real D1 data via
+`getLeaderboard`/`getRecentActivity` in `server/db/elo.ts` (direct
+function calls, no HTTP round trip, server component). Verified live with
+seeded categories/items/votes — correct ranks, elo, category tags, and
+relative-time activity feed all rendered.
+
+The Spotlight card and hero stats are still on the `lib/rank-data.ts`
+mock, intentionally: Spotlight needs fields the schema doesn't store
+(`addedDaysAgo`, `description`, `headToHeads`, `metadataSource`), and the
+category system was generalized from a fixed 3-value enum
+(MOVIES/GAMES/RESTAURANTS, each with a hardcoded color) to arbitrary
+DB-driven category titles with hash-based tag colors
+(`components/ui/category-tag.tsx`) — extending that to Spotlight is a
+product decision, not something to infer silently.
+
+Still open (step 6): delete the old `ranking-api` repo once parity is
+confirmed, and — if wanted — a real vote/comparison screen, Spotlight
+wired to real data (needs schema additions), and the category filter
+pills wired to actually filter (currently decorative, `useState` only).
 
 
 ## Context

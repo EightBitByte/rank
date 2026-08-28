@@ -1,3 +1,5 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { drizzle } from "drizzle-orm/d1";
 import { CategoryFilter } from "@/components/ui/category-filter";
 import { Leaderboard } from "@/components/ui/leaderboard";
 import { RecentActivityList } from "@/components/ui/recent-activity";
@@ -5,15 +7,25 @@ import { SiteFooter } from "@/components/ui/site-footer";
 import { SiteHeader } from "@/components/ui/site-header";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Stat } from "@/components/ui/stat";
-import {
-  categories,
-  heroStats,
-  leaderboard,
-  recentActivity,
-  spotlight,
-} from "@/lib/rank-data";
+import { formatRelativeTime } from "@/lib/format-time";
+import { categories, heroStats, spotlight } from "@/lib/rank-data";
+import { getLeaderboard, getRecentActivity } from "@/server/db/elo";
 
-export default function Home() {
+export default async function Home() {
+  const { env } = getCloudflareContext();
+  const db = drizzle(env.DB);
+
+  const [leaderboard, recentMatches] = await Promise.all([
+    getLeaderboard(db),
+    getRecentActivity(db),
+  ]);
+
+  const recentActivity = recentMatches.map((match) => ({
+    winner: match.winner,
+    loser: match.loser,
+    time: formatRelativeTime(match.timePlayed),
+  }));
+
   return (
     <div className="mx-auto w-full max-w-[1180px] flex-1 px-8 pb-24">
       <SiteHeader />

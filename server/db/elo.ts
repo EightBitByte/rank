@@ -1,5 +1,6 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
+import { alias } from "drizzle-orm/sqlite-core";
 import {
   applyComparison,
   ELO_DEFAULT,
@@ -7,7 +8,7 @@ import {
   RD_DEFAULT,
 } from "../lib/elo";
 import type { Match } from "./schema";
-import { eloRecords, items, matches } from "./schema";
+import { categories, eloRecords, items, matches } from "./schema";
 
 /**
  * Seeds an elo record for a newly created item (unrated).
@@ -120,6 +121,71 @@ export async function getTopRated(db: DrizzleD1Database, limit: number = 10) {
       .limit(limit);
   } catch (error) {
     throw new Error(`Failed to fetch top rated: ${error}`);
+  }
+}
+
+/**
+ * Ranked leaderboard: items joined with their elo and category title,
+ * ordered highest elo first.
+ */
+export async function getLeaderboard(
+  db: DrizzleD1Database,
+  limit: number = 10,
+) {
+  try {
+    const rows = await db
+      .select({
+        title: items.title,
+        elo: eloRecords.elo,
+        category: categories.title,
+      })
+      .from(items)
+      .innerJoin(eloRecords, eq(items.id, eloRecords.item_id))
+      .leftJoin(categories, eq(items.category_id, categories.id))
+      .orderBy(desc(eloRecords.elo))
+      .limit(limit);
+
+    return rows.map((row, index) => ({
+      rank: index + 1,
+      title: row.title ?? "Untitled",
+      category: row.category ?? "Uncategorized",
+      elo: Math.round(row.elo),
+    }));
+  } catch (error) {
+    throw new Error(`Failed to fetch leaderboard: ${error}`);
+  }
+}
+
+/**
+ * Recent matches with winner/loser titles resolved, newest first.
+ */
+export async function getRecentActivity(
+  db: DrizzleD1Database,
+  limit: number = 10,
+) {
+  try {
+    const winnerItems = alias(items, "winner_items");
+    const loserItems = alias(items, "loser_items");
+
+    const rows = await db
+      .select({
+        winner: winnerItems.title,
+        loser: loserItems.title,
+        timePlayed: matches.time_played,
+      })
+      .from(matches)
+      .innerJoin(winnerItems, eq(matches.winner_id, winnerItems.id))
+      .innerJoin(loserItems, eq(matches.loser_id, loserItems.id))
+      .orderBy(desc(matches.time_played))
+      .limit(limit);
+
+    return rows.map((row) => ({
+      winner: row.winner ?? "Untitled",
+      loser: row.loser ?? "Untitled",
+      timePlayed: row.timePlayed,
+    }));
+  } catch (error) {
+    throw new Error(`Failed to fetch recent activity: ${error}`);
   }
 }
 
