@@ -1,5 +1,5 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { deleteById, insertRow, selectAll } from "./crud";
+import { deleteById, insertRow, selectAll, selectCount } from "./crud";
 import { items } from "./schema";
 
 type NewItem = typeof items.$inferInsert;
@@ -14,4 +14,8 @@ export function getAllItems(db: DrizzleD1Database) {
 
 export function deleteItem(db: DrizzleD1Database, itemId: number) {
   return deleteById(db, items, itemId);
+}
+
+export async function getItemCount(db: DrizzleD1Database): Promise<number> {
+  return selectCount(db, items);
 }

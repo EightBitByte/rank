@@ -8,16 +8,33 @@ import { SiteHeader } from "@/components/ui/site-header";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Stat } from "@/components/ui/stat";
 import { formatRelativeTime } from "@/lib/format-time";
-import { categories, heroStats, spotlight } from "@/lib/rank-data";
-import { getLeaderboard, getRecentActivity } from "@/server/db/elo";
+import { spotlight } from "@/lib/rank-data";
+import { getAllCategories, getCategoryCount } from "@/server/db/categories";
+import {
+  getLeaderboard,
+  getMatchCount,
+  getRecentActivity,
+} from "@/server/db/elo";
+import { getItemCount } from "@/server/db/items";
 
 export default async function Home() {
   const { env } = getCloudflareContext();
   const db = drizzle(env.DB);
 
-  const [leaderboard, recentMatches] = await Promise.all([
+  const [
+    leaderboard,
+    recentMatches,
+    categories,
+    matchCount,
+    itemCount,
+    categoryCount,
+  ] = await Promise.all([
     getLeaderboard(db),
     getRecentActivity(db),
+    getAllCategories(db),
+    getMatchCount(db),
+    getItemCount(db),
+    getCategoryCount(db),
   ]);
 
   const recentActivity = recentMatches.map((match) => ({
@@ -42,14 +59,14 @@ export default async function Home() {
           can go head-to-head. Are they fair comparisons? Probably not.
         </p>
         <div className="mt-2 flex gap-7">
-          {heroStats.map((stat) => (
-            <Stat key={stat.label} value={stat.value} label={stat.label} />
-          ))}
+          <Stat value={matchCount.toString()} label="comparisons made" />
+          <Stat value={itemCount.toString()} label="items ranked" />
+          <Stat value={categoryCount.toString()} label="categories of items" />
         </div>
       </section>
 
       <section className="pb-5">
-        <CategoryFilter categories={categories} />
+        <CategoryFilter categories={categories.map((c) => c.title)} />
       </section>
 
       <section className="pt-5 pb-16">

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type { SQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
 
@@ -31,4 +31,11 @@ export async function deleteById<T extends TableWithId>(
 ): Promise<T["$inferSelect"] | undefined> {
   const [row] = await db.delete(table).where(eq(table.id, id)).returning();
   return row as T["$inferSelect"] | undefined;
+}
+
+export async function selectCount<T extends SQLiteTable>(
+  db: DrizzleD1Database,
+  table: T,
+): Promise<number> {
+  return (await db.select({ value: count() }).from(table))[0].value;
 }

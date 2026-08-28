@@ -3,7 +3,12 @@ import { drizzle } from "drizzle-orm/d1";
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { createEloRecord, getComparisonPair, logMatch } from "@/server/db/elo";
+import {
+  createEloRecord,
+  getComparisonPair,
+  getNumMatches,
+  logMatch,
+} from "@/server/db/elo";
 import { createItem, getAllItems } from "@/server/db/items";
 import {
   getMovieDetailsById,
@@ -53,12 +58,9 @@ app.get("/items/getAll", async (c) => {
   return c.json(items);
 });
 
+app.use("/items/new", requireSharedSecret);
 app.post("/items/new", async (c) => {
   const { env } = getCloudflareContext();
-  const authHeader = c.req.header("Authorization");
-  if (authHeader !== `Bearer ${env.WORKER_SHARED_SECRET}`) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
 
   const body = await c.req.json<{
     title?: string;
@@ -77,7 +79,17 @@ app.post("/items/new", async (c) => {
   return c.json(item, 201);
 });
 
+app.get("/matches/count", async (c) => {
+  const { env } = getCloudflareContext();
+
+  const db = drizzle(env.DB);
+  const count = await getNumMatches(db);
+
+  return c.json(count, 200);
+});
+
 // --------------- Comparisons ---------------
+app.use("/compare/next", requireSharedSecret);
 app.get("/compare/next", async (c) => {
   const { env } = getCloudflareContext();
   const db = drizzle(env.DB);
@@ -90,6 +102,7 @@ app.get("/compare/next", async (c) => {
   return c.json({ data: pair }, 200);
 });
 
+app.use("/vote", requireSharedSecret);
 app.post("/vote", async (c) => {
   const { env } = getCloudflareContext();
   const body = await c.req.json<{ winnerId?: number; loserId?: number }>();

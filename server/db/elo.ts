@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { count, desc, eq, inArray } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { alias } from "drizzle-orm/sqlite-core";
 import {
@@ -7,6 +7,7 @@ import {
   inflateRDForTime,
   RD_DEFAULT,
 } from "../lib/elo";
+import { selectCount } from "./crud";
 import type { Match } from "./schema";
 import { categories, eloRecords, items, matches } from "./schema";
 
@@ -236,4 +237,8 @@ export async function getComparisonPair(
   } catch (error) {
     throw new Error(`Failed to fetch comparison pair: ${error}`);
   }
+}
+
+export async function getMatchCount(db: DrizzleD1Database): Promise<number> {
+  return selectCount(db, matches);
 }
