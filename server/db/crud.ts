@@ -39,6 +39,20 @@ export async function deleteById<T extends TableWithId>(
   return row as T["$inferSelect"] | undefined;
 }
 
+export async function updateById<T extends TableWithId>(
+  db: DrizzleD1Database,
+  table: T,
+  id: number,
+  data: Partial<T["$inferInsert"]>,
+): Promise<T["$inferSelect"] | undefined> {
+  const [row] = await db
+    .update(table)
+    .set(data)
+    .where(eq(table.id, id))
+    .returning();
+  return row as T["$inferSelect"] | undefined;
+}
+
 export async function selectCount<T extends SQLiteTable>(
   db: DrizzleD1Database,
   table: T,

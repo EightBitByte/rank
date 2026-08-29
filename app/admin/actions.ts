@@ -2,7 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { createCategory } from "@/server/db/categories";
+import { redirect } from "next/navigation";
+import { clearAdminSessionCookie, requireAdmin } from "@/lib/admin-auth";
+import {
+  createCategory,
+  deleteCategory,
+  updateCategory,
+} from "@/server/db/categories";
 import { getDb } from "@/server/db/crud";
 import { createEloRecord, logMatch } from "@/server/db/elo";
 import { createItem, deleteItemCascade } from "@/server/db/items";
@@ -11,6 +17,11 @@ import {
   searchMoviesByTitle,
   searchTVShowsByTitle,
 } from "@/server/external/tmdb";
+
+export async function logoutAction() {
+  await clearAdminSessionCookie();
+  redirect("/admin/login");
+}
 
 export type TmdbSearchResult = {
   id: number;
@@ -24,6 +35,7 @@ export async function searchTmdbAction(
   query: string,
   mediaType: "movie" | "tv",
 ): Promise<TmdbSearchResult[]> {
+  await requireAdmin();
   const { env } = getDb();
   if (!query.trim()) return [];
 
@@ -58,6 +70,7 @@ export async function searchTmdbAction(
 }
 
 export async function createCategoryAction(title: string, color?: string) {
+  await requireAdmin();
   const { db: database } = getDb();
   const trimmed = title.trim();
   if (!trimmed) throw new Error("Category name can't be empty.");
@@ -68,6 +81,35 @@ export async function createCategoryAction(title: string, color?: string) {
   });
   revalidatePath("/admin");
   return category;
+}
+
+export async function updateCategoryAction(input: {
+  categoryId: number;
+  title: string;
+  color: string | null;
+}) {
+  await requireAdmin();
+  const { db: database } = getDb();
+  const title = input.title.trim();
+  if (!title) throw new Error("Category name can't be empty.");
+
+  const category = await updateCategory(database, input.categoryId, {
+    title,
+    color: input.color,
+  });
+  revalidatePath("/admin");
+  return category;
+}
+
+export async function deleteCategoryAction(categoryId: number) {
+  await requireAdmin();
+  const { db: database } = getDb();
+  await database
+    .update(items)
+    .set({ category_id: null })
+    .where(eq(items.category_id, categoryId));
+  await deleteCategory(database, categoryId);
+  revalidatePath("/admin");
 }
 
 /** Shared by addManualItemAction and confirmDraftItemAction below. */
@@ -96,6 +138,7 @@ export async function addManualItemAction(input: {
   categoryId: number | null;
   description?: string;
 }) {
+  await requireAdmin();
   return createRosterItem(input);
 }
 
@@ -105,10 +148,12 @@ export async function confirmDraftItemAction(input: {
   elo: number;
   description?: string;
 }) {
+  await requireAdmin();
   return createRosterItem(input);
 }
 
 export async function deleteItemAction(itemId: number) {
+  await requireAdmin();
   const { db: database } = getDb();
   await deleteItemCascade(database, itemId);
   revalidatePath("/admin");
@@ -120,6 +165,7 @@ export async function updateItemAction(input: {
   categoryId: number | null;
   elo: number;
 }) {
+  await requireAdmin();
   const { db: database } = getDb();
   const title = input.title.trim();
   if (!title) throw new Error("Title can't be empty.");
@@ -138,6 +184,7 @@ export async function updateItemAction(input: {
 }
 
 export async function voteAction(winnerId: number, loserId: number) {
+  await requireAdmin();
   const { db: database } = getDb();
   await logMatch(database, winnerId, loserId);
   revalidatePath("/admin");

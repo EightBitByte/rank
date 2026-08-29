@@ -12,6 +12,7 @@ import {
 } from "@/app/admin/actions";
 import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
 import type { AdminCategory } from "./admin-shell";
+import { CATEGORY_COLOR_SWATCHES } from "./category-colors";
 import { CategorySelect } from "./category-select";
 
 const SOURCE_TYPES = [
@@ -34,15 +35,6 @@ const MANUAL_TABS = [
 ] as const;
 
 type ManualTabKey = (typeof MANUAL_TABS)[number]["key"];
-
-const CATEGORY_COLOR_SWATCHES = [
-  "#ff5a1f",
-  "#1e40ff",
-  "#00c48c",
-  "#e11d48",
-  "#a855f7",
-  "#111111",
-];
 
 type Draft = {
   title: string;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { logoutAction } from "@/app/admin/actions";
 
 export function AdminHeader() {
   return (
@@ -11,12 +12,22 @@ export function AdminHeader() {
           admin
         </span>
       </div>
-      <Link
-        href="/"
-        className="font-display text-sm font-semibold text-rank-fg opacity-55"
-      >
-        ← Back to leaderboard
-      </Link>
+      <div className="flex items-center gap-5">
+        <Link
+          href="/"
+          className="font-display text-sm font-semibold text-rank-fg opacity-55"
+        >
+          ← Back to leaderboard
+        </Link>
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            className="cursor-pointer font-display text-sm font-semibold text-rank-fg opacity-55"
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
     </header>
   );
 }
