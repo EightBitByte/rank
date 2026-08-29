@@ -1,6 +1,12 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { count, eq } from "drizzle-orm";
-import type { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
 import type { SQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
+
+export function getDb() {
+  const { env } = getCloudflareContext();
+  return { db: drizzle(env.DB), env };
+}
 
 /**
  * The shared shape behind every entity's create / list / delete. Each entity

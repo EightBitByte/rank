@@ -9,6 +9,7 @@ import {
   searchTmdbAction,
   type TmdbSearchResult,
 } from "@/app/admin/actions";
+import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
 import type { AdminCategory } from "./admin-shell";
 import { CategorySelect } from "./category-select";
 
@@ -243,12 +244,9 @@ export function AddItemPanel({
                 key={`${r.mediaType}-${r.id}`}
                 className="flex items-center gap-3.5 rounded-xl border border-black/[0.08] px-4 py-3"
               >
-                <div
-                  className="h-10 w-10 shrink-0 rounded-lg bg-black/[0.03]"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 5px, transparent 5px 10px)",
-                  }}
+                <PlaceholderThumbnail
+                  className="h-10 w-10 shrink-0 rounded-lg"
+                  dense
                 />
                 <div className="flex-1">
                   <div className="font-display text-sm font-bold">

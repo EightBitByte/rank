@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { voteAction } from "@/app/admin/actions";
 import { CategoryTag } from "@/components/ui/category-tag";
+import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
 import type { AdminItem } from "./admin-shell";
 
 function pickTwoRandomIds(items: AdminItem[]): [number, number] | null {
@@ -113,13 +114,7 @@ function MatchCard({
         picked ? "border-rank-orange" : "border-transparent"
       }`}
     >
-      <div
-        className="h-[140px] w-[140px] rounded-2xl bg-black/[0.03]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 6px, transparent 6px 12px)",
-        }}
-      />
+      <PlaceholderThumbnail className="h-[140px] w-[140px] rounded-2xl" />
       <CategoryTag category={item.category} />
       <div className="font-display text-xl font-extrabold">{item.title}</div>
       <div className="font-display text-[15px] font-extrabold opacity-50">

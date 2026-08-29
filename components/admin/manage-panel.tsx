@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { deleteItemAction, updateItemAction } from "@/app/admin/actions";
 import { CategoryTag } from "@/components/ui/category-tag";
+import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
 import type { AdminCategory, AdminItem } from "./admin-shell";
 import { CategorySelect } from "./category-select";
 
@@ -84,12 +85,9 @@ export function ManagePanel({
         {filtered.map((item) => (
           <div key={item.id}>
             <div className="flex items-center gap-4 border-b border-black/[0.06] px-[22px] py-3.5 last:border-b-0">
-              <div
-                className="h-[42px] w-[42px] shrink-0 rounded-[10px] bg-black/[0.03]"
-                style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 5px, transparent 5px 10px)",
-                }}
+              <PlaceholderThumbnail
+                className="h-[42px] w-[42px] shrink-0 rounded-[10px]"
+                dense
               />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-[15px] font-bold">

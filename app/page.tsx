@@ -1,5 +1,3 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { drizzle } from "drizzle-orm/d1";
 import { CategoryFilter } from "@/components/ui/category-filter";
 import { Leaderboard } from "@/components/ui/leaderboard";
 import { RecentActivityList } from "@/components/ui/recent-activity";
@@ -10,6 +8,7 @@ import { Stat } from "@/components/ui/stat";
 import { formatRelativeTime } from "@/lib/format-time";
 import { spotlight } from "@/lib/rank-data";
 import { getAllCategories, getCategoryCount } from "@/server/db/categories";
+import { getDb } from "@/server/db/crud";
 import {
   getLeaderboard,
   getMatchCount,
@@ -18,8 +17,7 @@ import {
 import { getItemCount } from "@/server/db/items";
 
 export default async function Home() {
-  const { env } = getCloudflareContext();
-  const db = drizzle(env.DB);
+  const { db } = getDb();
 
   const [
     leaderboard,

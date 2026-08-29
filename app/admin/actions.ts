@@ -1,10 +1,9 @@
 "use server";
 
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
 import { revalidatePath } from "next/cache";
 import { createCategory } from "@/server/db/categories";
+import { getDb } from "@/server/db/crud";
 import { createEloRecord, logMatch } from "@/server/db/elo";
 import { createItem, deleteItemCascade } from "@/server/db/items";
 import { eloRecords, items } from "@/server/db/schema";
@@ -12,11 +11,6 @@ import {
   searchMoviesByTitle,
   searchTVShowsByTitle,
 } from "@/server/external/tmdb";
-
-function db() {
-  const { env } = getCloudflareContext();
-  return { db: drizzle(env.DB), env };
-}
 
 export type TmdbSearchResult = {
   id: number;
@@ -28,7 +22,7 @@ export type TmdbSearchResult = {
 export async function searchTmdbAction(
   query: string,
 ): Promise<TmdbSearchResult[]> {
-  const { env } = db();
+  const { env } = getDb();
   if (!query.trim()) return [];
 
   const [movies, tv] = await Promise.all([
@@ -58,7 +52,7 @@ export async function searchTmdbAction(
 }
 
 export async function createCategoryAction(title: string, color?: string) {
-  const { db: database } = db();
+  const { db: database } = getDb();
   const trimmed = title.trim();
   if (!trimmed) throw new Error("Category name can't be empty.");
 
@@ -70,13 +64,14 @@ export async function createCategoryAction(title: string, color?: string) {
   return category;
 }
 
-async function addItem(input: {
+/** Shared by addManualItemAction and confirmDraftItemAction below. */
+async function createRosterItem(input: {
   title: string;
   categoryId: number | null;
   description?: string;
   elo?: number;
 }) {
-  const { db: database } = db();
+  const { db: database } = getDb();
   const title = input.title.trim();
   if (!title) throw new Error("Title can't be empty.");
 
@@ -95,7 +90,7 @@ export async function addManualItemAction(input: {
   categoryId: number | null;
   description?: string;
 }) {
-  return addItem(input);
+  return createRosterItem(input);
 }
 
 export async function confirmDraftItemAction(input: {
@@ -104,11 +99,11 @@ export async function confirmDraftItemAction(input: {
   elo: number;
   description?: string;
 }) {
-  return addItem(input);
+  return createRosterItem(input);
 }
 
 export async function deleteItemAction(itemId: number) {
-  const { db: database } = db();
+  const { db: database } = getDb();
   await deleteItemCascade(database, itemId);
   revalidatePath("/admin");
 }
@@ -119,7 +114,7 @@ export async function updateItemAction(input: {
   categoryId: number | null;
   elo: number;
 }) {
-  const { db: database } = db();
+  const { db: database } = getDb();
   const title = input.title.trim();
   if (!title) throw new Error("Title can't be empty.");
 
@@ -137,7 +132,7 @@ export async function updateItemAction(input: {
 }
 
 export async function voteAction(winnerId: number, loserId: number) {
-  const { db: database } = db();
+  const { db: database } = getDb();
   await logMatch(database, winnerId, loserId);
   revalidatePath("/admin");
 }

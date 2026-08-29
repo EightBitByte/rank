@@ -1,4 +1,5 @@
 import { CategoryTag } from "@/components/ui/category-tag";
+import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
 import type { LeaderboardItem } from "@/lib/rank-data";
 
 const RANK_COLORS = ["#ff5a1f", "#c9c9c9", "#c98a4b"];
@@ -26,13 +27,7 @@ function LeaderboardRow({ item }: { item: LeaderboardItem }) {
       >
         {item.rank}
       </div>
-      <div
-        className="h-[52px] w-[52px] shrink-0 rounded-xl bg-black/[0.03]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 6px, transparent 6px 12px)",
-        }}
-      />
+      <PlaceholderThumbnail className="h-[52px] w-[52px] shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
         <div className="truncate font-display text-base font-bold">
           {item.title}

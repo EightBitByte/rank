@@ -1,15 +1,11 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { drizzle } from "drizzle-orm/d1";
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import {
-  createEloRecord,
-  getComparisonPair,
-  getNumMatches,
-  logMatch,
-} from "@/server/db/elo";
-import { createItem, getAllItems } from "@/server/db/items";
+import { addManualItemAction, voteAction } from "@/app/admin/actions";
+import { getDb } from "@/server/db/crud";
+import { getComparisonPair, getMatchCount } from "@/server/db/elo";
+import { getAllItems } from "@/server/db/items";
 import {
   getMovieDetailsById,
   getTVShowDetailsById,
@@ -42,7 +38,7 @@ app.get("/", (c) => {
 
 // --------------- Items ---------------
 app.get("/items/getAll", async (c) => {
-  const { env } = getCloudflareContext();
+  const { db, env } = getDb();
   const clientIp = c.req.header("CF-Connecting-IP") ?? "unknown";
 
   const { success } = await env.ALL_ITEMS_ENDPOINT_LIMITER.limit({
@@ -52,7 +48,6 @@ app.get("/items/getAll", async (c) => {
     return c.json({ error: "Rate limit exceeded" }, 429);
   }
 
-  const db = drizzle(env.DB);
   const items = await getAllItems(db);
 
   return c.json(items);
@@ -60,30 +55,24 @@ app.get("/items/getAll", async (c) => {
 
 app.use("/items/new", requireSharedSecret);
 app.post("/items/new", async (c) => {
-  const { env } = getCloudflareContext();
-
   const body = await c.req.json<{
     title?: string;
     description?: string;
     category_id?: number;
   }>();
 
-  const db = drizzle(env.DB);
-  const item = await createItem(db, {
-    title: body.title,
+  const item = await addManualItemAction({
+    title: body.title ?? "",
+    categoryId: body.category_id ?? null,
     description: body.description,
-    category_id: body.category_id,
   });
-  await createEloRecord(db, item.id);
 
   return c.json(item, 201);
 });
 
 app.get("/matches/count", async (c) => {
-  const { env } = getCloudflareContext();
-
-  const db = drizzle(env.DB);
-  const count = await getNumMatches(db);
+  const { db } = getDb();
+  const count = await getMatchCount(db);
 
   return c.json(count, 200);
 });
@@ -91,8 +80,7 @@ app.get("/matches/count", async (c) => {
 // --------------- Comparisons ---------------
 app.use("/compare/next", requireSharedSecret);
 app.get("/compare/next", async (c) => {
-  const { env } = getCloudflareContext();
-  const db = drizzle(env.DB);
+  const { db } = getDb();
   const pair = await getComparisonPair(db);
 
   if (!pair) {
@@ -104,7 +92,6 @@ app.get("/compare/next", async (c) => {
 
 app.use("/vote", requireSharedSecret);
 app.post("/vote", async (c) => {
-  const { env } = getCloudflareContext();
   const body = await c.req.json<{ winnerId?: number; loserId?: number }>();
 
   if (typeof body.winnerId !== "number" || typeof body.loserId !== "number") {
@@ -114,8 +101,7 @@ app.post("/vote", async (c) => {
     );
   }
 
-  const db = drizzle(env.DB);
-  await logMatch(db, body.winnerId, body.loserId);
+  await voteAction(body.winnerId, body.loserId);
 
   return c.json({ ok: true }, 200);
 });
