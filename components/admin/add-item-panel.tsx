@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import {
@@ -14,9 +15,15 @@ import type { AdminCategory } from "./admin-shell";
 import { CategorySelect } from "./category-select";
 
 const SOURCE_TYPES = [
-  { key: "movies", label: "Movies & TV", available: true },
-  { key: "games", label: "Games", available: false },
-  { key: "restaurants", label: "Restaurants", available: false },
+  { key: "movies", label: "Movies", available: true, mediaType: "movie" },
+  { key: "tv", label: "TV", available: true, mediaType: "tv" },
+  { key: "games", label: "Games", available: false, mediaType: undefined },
+  {
+    key: "restaurants",
+    label: "Restaurants",
+    available: false,
+    mediaType: undefined,
+  },
 ] as const;
 
 type SourceKey = (typeof SOURCE_TYPES)[number]["key"];
@@ -82,6 +89,10 @@ export function AddItemPanel({
 
   const [addedMessage, setAddedMessage] = useState<string | null>(null);
 
+  const [previewResult, setPreviewResult] = useState<TmdbSearchResult | null>(
+    null,
+  );
+
   const activeSource = SOURCE_TYPES.find((s) => s.key === source) as
     | (typeof SOURCE_TYPES)[number]
     | undefined;
@@ -91,11 +102,12 @@ export function AddItemPanel({
   }
 
   async function runSearch() {
-    if (!query.trim() || !activeSource?.available) return;
+    if (!query.trim() || !activeSource?.available || !activeSource.mediaType)
+      return;
     setSearching(true);
     setSearchError(null);
     try {
-      setResults(await searchTmdbAction(query));
+      setResults(await searchTmdbAction(query, activeSource.mediaType));
     } catch {
       setSearchError("Search failed. Try again in a moment.");
     } finally {
@@ -214,7 +226,7 @@ export function AddItemPanel({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Search movies & TV shows..."
+              placeholder={`Search ${activeSource.label.toLowerCase()}...`}
               className={`flex-1 ${inputClass}`}
             />
             <button
@@ -244,10 +256,25 @@ export function AddItemPanel({
                 key={`${r.mediaType}-${r.id}`}
                 className="flex items-center gap-3.5 rounded-xl border border-black/[0.08] px-4 py-3"
               >
-                <PlaceholderThumbnail
-                  className="h-10 w-10 shrink-0 rounded-lg"
-                  dense
-                />
+                {r.poster ? (
+                  <button
+                    type="button"
+                    onClick={() => setPreviewResult(r)}
+                    className="relative w-10 aspect-2/3 shrink-0 cursor-zoom-in overflow-hidden rounded-lg"
+                  >
+                    <Image
+                      src={r.poster}
+                      alt={`poster for ${r.title}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ) : (
+                  <PlaceholderThumbnail
+                    className="h-10 w-10 shrink-0 rounded-lg"
+                    dense
+                  />
+                )}
                 <div className="flex-1">
                   <div className="font-display text-sm font-bold">
                     {r.title}
@@ -461,6 +488,38 @@ export function AddItemPanel({
           </>
         )}
       </div>
+
+      {previewResult?.poster && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
+          <button
+            type="button"
+            aria-label="Close preview"
+            onClick={() => setPreviewResult(null)}
+            className="absolute inset-0 cursor-default bg-black/70"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${previewResult.title} poster`}
+            className="relative w-full max-w-sm aspect-2/3"
+          >
+            <Image
+              src={previewResult.poster.replace("/t/p/w500/", "/t/p/w780/")}
+              alt={`poster for ${previewResult.title}`}
+              fill
+              className="rounded-2xl object-cover"
+              sizes="384px"
+            />
+            <button
+              type="button"
+              onClick={() => setPreviewResult(null)}
+              className="absolute -top-3 -right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white font-display text-sm font-bold shadow-md"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

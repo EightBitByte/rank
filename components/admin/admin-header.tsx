@@ -3,7 +3,7 @@ import Link from "next/link";
 export function AdminHeader() {
   return (
     <header className="flex items-center justify-between py-10">
-      <div className="flex items-baseline gap-2.5">
+      <div className="flex items-center gap-2.5">
         <span className="font-display text-[30px] font-black tracking-[-0.5px]">
           RANK
         </span>

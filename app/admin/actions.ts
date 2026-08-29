@@ -15,40 +15,46 @@ import {
 export type TmdbSearchResult = {
   id: number;
   mediaType: "movie" | "tv";
+  poster?: string;
   title: string;
   meta: string;
 };
 
 export async function searchTmdbAction(
   query: string,
+  mediaType: "movie" | "tv",
 ): Promise<TmdbSearchResult[]> {
   const { env } = getDb();
   if (!query.trim()) return [];
 
-  const [movies, tv] = await Promise.all([
-    searchMoviesByTitle({ apiKey: env.TMDB_KEY, title: query }),
-    searchTVShowsByTitle({ apiKey: env.TMDB_KEY, title: query }),
-  ]);
-
-  const movieResults: TmdbSearchResult[] = movies.results
-    .slice(0, 6)
-    .map((r) => ({
+  if (mediaType === "movie") {
+    const movies = await searchMoviesByTitle({
+      apiKey: env.TMDB_KEY,
+      title: query,
+    });
+    return movies.results.slice(0, 6).map((r) => ({
       id: r.id,
       mediaType: "movie",
+      poster: r.poster_path
+        ? `https://image.tmdb.org/t/p/w500/${r.poster_path}`
+        : undefined,
       title: r.title,
       meta: r.release_date ? r.release_date.slice(0, 4) : "Unknown year",
     }));
+  }
 
-  const tvResults: TmdbSearchResult[] = tv.results.slice(0, 6).map((r) => ({
+  const tv = await searchTVShowsByTitle({ apiKey: env.TMDB_KEY, title: query });
+  return tv.results.slice(0, 6).map((r) => ({
     id: r.id,
     mediaType: "tv",
+    poster: r.poster_path
+      ? `https://image.tmdb.org/t/p/w500/${r.poster_path}`
+      : undefined,
     title: r.name,
     meta: r.first_air_date
       ? `${r.first_air_date.slice(0, 4)} · TV`
       : "TV series",
   }));
-
-  return [...movieResults, ...tvResults];
 }
 
 export async function createCategoryAction(title: string, color?: string) {

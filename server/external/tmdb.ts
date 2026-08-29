@@ -24,7 +24,7 @@ async function fetchTmdb<T extends z.ZodTypeAny>(
       `TMDB request failed: ${result.status} ${await result.text()}`,
     );
 
-  const data = (await result.json()) as any;
+  const data = (await result.json()) as Record<string, unknown>;
   if (data.error)
     throw new Error(`TMDB data error: ${data.error} ${data.message}`);
 
