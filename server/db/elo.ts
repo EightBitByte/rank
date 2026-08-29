@@ -14,10 +14,14 @@ import { categories, eloRecords, items, matches } from "./schema";
 /**
  * Seeds an elo record for a newly created item (unrated).
  */
-export async function createEloRecord(db: DrizzleD1Database, itemId: number) {
+export async function createEloRecord(
+  db: DrizzleD1Database,
+  itemId: number,
+  elo: number = ELO_DEFAULT,
+) {
   const [record] = await db
     .insert(eloRecords)
-    .values({ item_id: itemId, elo: ELO_DEFAULT, rd: RD_DEFAULT })
+    .values({ item_id: itemId, elo, rd: RD_DEFAULT })
     .returning();
 
   return record;
@@ -241,4 +245,36 @@ export async function getComparisonPair(
 
 export async function getMatchCount(db: DrizzleD1Database): Promise<number> {
   return selectCount(db, matches);
+}
+
+/**
+ * Every item joined with its elo and category title, highest elo first.
+ * Used by the admin console, which needs the full roster (ids included)
+ * rather than the leaderboard's top-N slice.
+ */
+export async function getAllItemsWithElo(db: DrizzleD1Database) {
+  try {
+    const rows = await db
+      .select({
+        id: items.id,
+        title: items.title,
+        category: categories.title,
+        categoryId: items.category_id,
+        elo: eloRecords.elo,
+      })
+      .from(items)
+      .innerJoin(eloRecords, eq(items.id, eloRecords.item_id))
+      .leftJoin(categories, eq(items.category_id, categories.id))
+      .orderBy(desc(eloRecords.elo));
+
+    return rows.map((row) => ({
+      id: row.id,
+      title: row.title ?? "Untitled",
+      category: row.category ?? "Uncategorized",
+      categoryId: row.categoryId,
+      elo: Math.round(row.elo),
+    }));
+  } catch (error) {
+    throw new Error(`Failed to fetch items with elo: ${error}`);
+  }
 }

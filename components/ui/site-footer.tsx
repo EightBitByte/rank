@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.08] pt-8">
@@ -5,9 +7,9 @@ export function SiteFooter() {
         Movie &amp; TV data via TMDb · Game data via IGDB · Restaurant data via
         Google Places
       </span>
-      <a href="example.com" className="text-xs font-semibold opacity-60">
+      <Link href="/admin" className="text-xs font-semibold opacity-60">
         Admin
-      </a>
+      </Link>
     </footer>
   );
 }

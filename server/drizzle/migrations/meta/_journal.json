@@ -43,6 +43,13 @@
       "when": 1787954030929,
       "tag": "0005_petite_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787961164588,
+      "tag": "0006_sharp_mole_man",
+      "breakpoints": true
     }
   ]
 }

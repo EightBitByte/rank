@@ -9,6 +9,7 @@ import {
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey(),
   title: text("title").notNull(),
+  color: text("color"),
 });
 
 export const assets = sqliteTable("assets", {

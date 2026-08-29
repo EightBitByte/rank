@@ -47,3 +47,5 @@ worker-configuration.d.ts
 *.tsbuildinfo
 next-env.d.ts
 
+# designs
+*.dc.html
