@@ -16,6 +16,8 @@ import {
 } from "@/server/db/elo";
 import { getItemCount } from "@/server/db/items";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { db } = getDb();
 

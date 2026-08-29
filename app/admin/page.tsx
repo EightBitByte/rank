@@ -6,6 +6,8 @@ import { getAllCategories } from "@/server/db/categories";
 import { getDb } from "@/server/db/crud";
 import { getAllItemsWithElo } from "@/server/db/elo";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   if (!(await isAdminAuthenticated())) {
     redirect("/admin/login");
