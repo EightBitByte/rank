@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearAdminSessionCookie, requireAdmin } from "@/lib/admin-auth";
+import { createAsset } from "@/server/db/assets";
 import {
   createCategory,
   deleteCategory,
@@ -118,17 +119,32 @@ async function createRosterItem(input: {
   categoryId: number | null;
   description?: string;
   elo?: number;
+  previewAssetHref?: string;
 }) {
   const { db: database } = getDb();
   const title = input.title.trim();
+  const assetHref = input.previewAssetHref;
   if (!title) throw new Error("Title can't be empty.");
-
   const item = await createItem(database, {
     title,
     category_id: input.categoryId ?? undefined,
     description: input.description?.trim() || undefined,
   });
   await createEloRecord(database, item.id, input.elo ?? 1200);
+
+  if (assetHref) {
+    const asset = await createAsset(database, {
+      item_id: item.id,
+      type: "image",
+      href: assetHref,
+    });
+
+    await database
+      .update(items)
+      .set({ preview_asset_id: asset.id })
+      .where(eq(items.id, item.id));
+  }
+
   revalidatePath("/admin");
   return item;
 }
@@ -137,6 +153,7 @@ export async function addManualItemAction(input: {
   title: string;
   categoryId: number | null;
   description?: string;
+  previewAssetHref?: string;
 }) {
   await requireAdmin();
   return createRosterItem(input);
@@ -147,6 +164,7 @@ export async function confirmDraftItemAction(input: {
   categoryId: number | null;
   elo: number;
   description?: string;
+  previewAssetHref?: string;
 }) {
   await requireAdmin();
   return createRosterItem(input);

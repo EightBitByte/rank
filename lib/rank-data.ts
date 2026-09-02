@@ -12,6 +12,7 @@ export type LeaderboardItem = {
   title: string;
   category: string;
   elo: number;
+  previewAssetHref: string | null;
 };
 
 export type HeadToHead = {
@@ -32,14 +33,8 @@ export type Spotlight = {
 export type RecentActivity = {
   winner: string;
   loser: string;
-  time: string;
+  time: number;
 };
-
-export const heroStats = [
-  { value: "1,248", label: "comparisons made" },
-  { value: "312", label: "items ranked" },
-  { value: "3", label: "categories, zero shame" },
-];
 
 export const categories: Category[] = [
   { key: "all", label: "All" },

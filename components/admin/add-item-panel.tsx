@@ -18,6 +18,7 @@ import { CategorySelect } from "./category-select";
 const SOURCE_TYPES = [
   { key: "movies", label: "Movies", available: true, mediaType: "movie" },
   { key: "tv", label: "TV", available: true, mediaType: "tv" },
+  { key: "music", label: "Music", available: false, mediaType: "music" },
   { key: "games", label: "Games", available: false, mediaType: undefined },
   {
     key: "restaurants",
@@ -43,6 +44,7 @@ type Draft = {
   meta: string;
   notes: string;
   sourceLabel: string;
+  previewAssetHref?: string;
 };
 
 const inputClass =
@@ -120,6 +122,7 @@ export function AddItemPanel({
       meta: result.meta,
       notes: "",
       sourceLabel: "TMDb",
+      previewAssetHref: result.poster,
     });
     setResults([]);
     setQuery("");
@@ -134,6 +137,7 @@ export function AddItemPanel({
         categoryId: draft.categoryId,
         elo: Number(draft.elo) || 1200,
         description: draft.notes,
+        previewAssetHref: draft.previewAssetHref,
       });
       setAddedMessage(`${draft.title} added to the roster.`);
       setDraft(null);

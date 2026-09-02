@@ -40,7 +40,7 @@ export default async function Home() {
   const recentActivity = recentMatches.map((match) => ({
     winner: match.winner,
     loser: match.loser,
-    time: formatRelativeTime(match.timePlayed),
+    time: match.timePlayed,
   }));
 
   return (

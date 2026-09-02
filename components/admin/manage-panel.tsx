@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { deleteItemAction, updateItemAction } from "@/app/admin/actions";
 import { CategoryTag } from "@/components/ui/category-tag";
@@ -32,6 +33,7 @@ export function ManagePanel({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [previewResult, setPreviewResult] = useState<AdminItem | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -100,6 +102,41 @@ export function ManagePanel({
         ))}
       </div>
 
+      {previewResult?.previewAssetHref && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
+          <button
+            type="button"
+            aria-label="Close preview"
+            onClick={() => setPreviewResult(null)}
+            className="absolute inset-0 cursor-default bg-black/70"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${previewResult.title} poster`}
+            className="relative w-full max-w-sm aspect-2/3"
+          >
+            <Image
+              src={previewResult.previewAssetHref.replace(
+                "/t/p/w500/",
+                "/t/p/w780/",
+              )}
+              alt={`poster for ${previewResult.title}`}
+              fill
+              className="rounded-2xl object-cover"
+              sizes="384px"
+            />
+            <button
+              type="button"
+              onClick={() => setPreviewResult(null)}
+              className="absolute -top-3 -right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white font-display text-sm font-bold shadow-md"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {manageTab === "categories" ? (
         <ManageCategoriesPanel
           items={items}
@@ -119,10 +156,25 @@ export function ManagePanel({
             {filtered.map((item) => (
               <div key={item.id}>
                 <div className="flex items-center gap-4 border-b border-black/[0.06] px-[22px] py-3.5 last:border-b-0">
-                  <PlaceholderThumbnail
-                    className="h-[42px] w-[42px] shrink-0 rounded-[10px]"
-                    dense
-                  />
+                  {item.previewAssetHref ? (
+                    <button
+                      type="button"
+                      onClick={() => setPreviewResult(item)}
+                      className="relative w-10 aspect-2/3 shrink-0 cursor-zoom-in overflow-hidden rounded-lg"
+                    >
+                      <Image
+                        src={item.previewAssetHref}
+                        alt={`poster for ${item.title}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </button>
+                  ) : (
+                    <PlaceholderThumbnail
+                      className="h-10 w-10 shrink-0 rounded-lg"
+                      dense
+                    />
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-display text-[15px] font-bold">
                       {item.title}

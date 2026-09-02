@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { voteAction } from "@/app/admin/actions";
 import { CategoryTag } from "@/components/ui/category-tag";
@@ -114,7 +115,18 @@ function MatchCard({
         picked ? "border-rank-orange" : "border-transparent"
       }`}
     >
-      <PlaceholderThumbnail className="h-[140px] w-[140px] rounded-2xl" />
+      {item.previewAssetHref ? (
+        <div className="relative w-32 aspect-2/3 shrink-0 overflow-hidden rounded-lg">
+          <Image
+            src={item.previewAssetHref}
+            alt={`poster for ${item.title}`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <PlaceholderThumbnail className="h-10 w-10 shrink-0 rounded-lg" dense />
+      )}
       <CategoryTag category={item.category} />
       <div className="font-display text-xl font-extrabold">{item.title}</div>
       <div className="font-display text-[15px] font-extrabold opacity-50">

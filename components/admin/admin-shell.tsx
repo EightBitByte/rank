@@ -11,6 +11,7 @@ export type AdminItem = {
   category: string;
   categoryId: number | null;
   elo: number;
+  previewAssetHref: string | null;
 };
 
 export type AdminCategory = { id: number; title: string; color: string | null };

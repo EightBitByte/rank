@@ -9,7 +9,7 @@ import {
 } from "../lib/elo";
 import { selectCount } from "./crud";
 import type { Match } from "./schema";
-import { categories, eloRecords, items, matches } from "./schema";
+import { assets, categories, eloRecords, items, matches } from "./schema";
 
 /**
  * Seeds an elo record for a newly created item (unrated).
@@ -143,10 +143,12 @@ export async function getLeaderboard(
         title: items.title,
         elo: eloRecords.elo,
         category: categories.title,
+        previewAssetHref: assets.href,
       })
       .from(items)
       .innerJoin(eloRecords, eq(items.id, eloRecords.item_id))
       .leftJoin(categories, eq(items.category_id, categories.id))
+      .leftJoin(assets, eq(items.preview_asset_id, assets.id))
       .orderBy(desc(eloRecords.elo))
       .limit(limit);
 
@@ -155,6 +157,7 @@ export async function getLeaderboard(
       title: row.title ?? "Untitled",
       category: row.category ?? "Uncategorized",
       elo: Math.round(row.elo),
+      previewAssetHref: row.previewAssetHref,
     }));
   } catch (error) {
     throw new Error(`Failed to fetch leaderboard: ${error}`);
@@ -261,10 +264,12 @@ export async function getAllItemsWithElo(db: DrizzleD1Database) {
         category: categories.title,
         categoryId: items.category_id,
         elo: eloRecords.elo,
+        previewAssetHref: assets.href,
       })
       .from(items)
       .innerJoin(eloRecords, eq(items.id, eloRecords.item_id))
       .leftJoin(categories, eq(items.category_id, categories.id))
+      .leftJoin(assets, eq(items.preview_asset_id, assets.id))
       .orderBy(desc(eloRecords.elo));
 
     return rows.map((row) => ({
@@ -273,6 +278,7 @@ export async function getAllItemsWithElo(db: DrizzleD1Database) {
       category: row.category ?? "Uncategorized",
       categoryId: row.categoryId,
       elo: Math.round(row.elo),
+      previewAssetHref: row.previewAssetHref,
     }));
   } catch (error) {
     throw new Error(`Failed to fetch items with elo: ${error}`);

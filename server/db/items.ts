@@ -1,4 +1,4 @@
-import { eq, or } from "drizzle-orm";
+import { eq, inArray, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { deleteById, insertRow, selectAll, selectCount } from "./crud";
 import { assets, eloRecords, items, matches } from "./schema";
@@ -41,4 +41,15 @@ export function deleteItemCascade(db: DrizzleD1Database, itemId: number) {
 
 export async function getItemCount(db: DrizzleD1Database): Promise<number> {
   return selectCount(db, items);
+}
+
+export async function getPreviewAssetsForItems(
+  db: DrizzleD1Database,
+  itemIds: number[],
+): Promise<{ href: string | null }[]> {
+  return db
+    .select({ id: items.id, href: assets.href })
+    .from(items)
+    .innerJoin(assets, eq(assets.item_id, items.id))
+    .where(inArray(items.id, itemIds));
 }

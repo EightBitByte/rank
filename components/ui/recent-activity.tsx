@@ -1,3 +1,4 @@
+import { formatRelativeTime } from "@/lib/format-time";
 import type { RecentActivity } from "@/lib/rank-data";
 
 export function RecentActivityList({ items }: { items: RecentActivity[] }) {
@@ -18,7 +19,7 @@ export function RecentActivityList({ items }: { items: RecentActivity[] }) {
             {activity.loser}
           </span>
           <span className="ml-auto whitespace-nowrap text-xs font-medium opacity-40">
-            {activity.time}
+            {formatRelativeTime(activity.time)}
           </span>
         </div>
       ))}
