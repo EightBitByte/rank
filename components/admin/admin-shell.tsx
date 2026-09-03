@@ -8,6 +8,7 @@ import { MatchupPanel } from "./matchup-panel";
 export type AdminItem = {
   id: number;
   title: string;
+  description: string;
   category: string;
   categoryId: number | null;
   elo: number;

@@ -182,6 +182,7 @@ export async function updateItemAction(input: {
   title: string;
   categoryId: number | null;
   elo: number;
+  description?: string;
 }) {
   await requireAdmin();
   const { db: database } = getDb();
@@ -191,7 +192,11 @@ export async function updateItemAction(input: {
   await database.batch([
     database
       .update(items)
-      .set({ title, category_id: input.categoryId })
+      .set({
+        title,
+        category_id: input.categoryId,
+        description: input.description?.trim() || null,
+      })
       .where(eq(items.id, input.itemId)),
     database
       .update(eloRecords)

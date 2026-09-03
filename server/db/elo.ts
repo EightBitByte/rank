@@ -281,6 +281,7 @@ export async function getAllItemsWithElo(db: DrizzleD1Database) {
       .select({
         id: items.id,
         title: items.title,
+        description: items.description,
         category: categories.title,
         categoryId: items.category_id,
         elo: eloRecords.elo,
@@ -295,6 +296,7 @@ export async function getAllItemsWithElo(db: DrizzleD1Database) {
     return rows.map((row) => ({
       id: row.id,
       title: row.title ?? "Untitled",
+      description: row.description ?? "",
       category: row.category ?? "Uncategorized",
       categoryId: row.categoryId,
       elo: Math.round(row.elo),

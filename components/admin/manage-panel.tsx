@@ -9,7 +9,12 @@ import type { AdminCategory, AdminItem } from "./admin-shell";
 import { CategorySelect } from "./category-select";
 import { ManageCategoriesPanel } from "./manage-categories-panel";
 
-type EditDraft = { title: string; categoryId: number | null; elo: string };
+type EditDraft = {
+  title: string;
+  categoryId: number | null;
+  elo: string;
+  description: string;
+};
 
 type ManageTab = "items" | "categories";
 
@@ -59,6 +64,7 @@ export function ManagePanel({
       title: item.title,
       categoryId: item.categoryId,
       elo: String(item.elo),
+      description: item.description,
     });
   }
 
@@ -76,6 +82,7 @@ export function ManagePanel({
         title: editDraft.title,
         categoryId: editDraft.categoryId,
         elo: Number(editDraft.elo) || 0,
+        description: editDraft.description,
       });
       cancelEdit();
     } finally {
@@ -247,6 +254,18 @@ export function ManagePanel({
                           setEditDraft({ ...editDraft, elo: e.target.value })
                         }
                         className="rounded-[10px] border border-black/[0.12] px-3.5 py-2.5 font-sans text-sm outline-none"
+                      />
+                      <textarea
+                        value={editDraft.description}
+                        onChange={(e) =>
+                          setEditDraft({
+                            ...editDraft,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Description…"
+                        rows={3}
+                        className="col-span-3 resize-y rounded-[10px] border border-black/[0.12] px-3.5 py-2.5 font-sans text-sm outline-none"
                       />
                       <div className="col-span-3 flex gap-2">
                         <button
