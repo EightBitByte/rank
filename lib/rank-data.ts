@@ -15,19 +15,18 @@ export type LeaderboardItem = {
   previewAssetHref: string | null;
 };
 
+export type TopItem = {
+  title: string;
+  description: string;
+  category: string;
+  elo: number;
+  previewAssetHref: string | null;
+  matches: { label: string; result: "win" | "loss" }[];
+};
+
 export type HeadToHead = {
   label: string;
   result: "win" | "loss";
-};
-
-export type Spotlight = {
-  category: LeaderboardCategory;
-  addedDaysAgo: number;
-  title: string;
-  elo: number;
-  description: string;
-  headToHeads: HeadToHead[];
-  metadataSource: string;
 };
 
 export type RecentActivity = {
@@ -42,18 +41,3 @@ export const categories: Category[] = [
   { key: "games", label: "Games" },
   { key: "restaurants", label: "Restaurants" },
 ];
-
-export const spotlight: Spotlight = {
-  category: "GAMES",
-  addedDaysAgo: 118,
-  title: "Disco Elysium",
-  elo: 1842,
-  description:
-    'A detective RPG where you can fail every skill check and somehow still solve the case. Undisputed champion of "games that made me feel things I didn\'t ask to feel."',
-  headToHeads: [
-    { label: "beat Avengers: Endgame", result: "win" },
-    { label: "beat Nobu Malibu", result: "win" },
-    { label: "lost to Baldur's Gate 3", result: "loss" },
-  ],
-  metadataSource: "Metadata via IGDB",
-};

@@ -5,8 +5,6 @@ import { SiteFooter } from "@/components/ui/site-footer";
 import { SiteHeader } from "@/components/ui/site-header";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Stat } from "@/components/ui/stat";
-import { formatRelativeTime } from "@/lib/format-time";
-import { spotlight } from "@/lib/rank-data";
 import { getAllCategories, getCategoryCount } from "@/server/db/categories";
 import { getDb } from "@/server/db/crud";
 import {
@@ -14,7 +12,7 @@ import {
   getMatchCount,
   getRecentActivity,
 } from "@/server/db/elo";
-import { getItemCount } from "@/server/db/items";
+import { getItemCount, getTopItem } from "@/server/db/items";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +21,7 @@ export default async function Home() {
 
   const [
     leaderboard,
+    topItem,
     recentMatches,
     categories,
     matchCount,
@@ -30,6 +29,7 @@ export default async function Home() {
     categoryCount,
   ] = await Promise.all([
     getLeaderboard(db),
+    getTopItem(db),
     getRecentActivity(db),
     getAllCategories(db),
     getMatchCount(db),
@@ -85,7 +85,7 @@ export default async function Home() {
         <h2 className="mb-[22px] font-display text-[28px] font-extrabold tracking-[-0.5px]">
           #1 right now
         </h2>
-        <SpotlightCard item={spotlight} />
+        <SpotlightCard item={topItem} />
       </section>
 
       <section className="pb-10">

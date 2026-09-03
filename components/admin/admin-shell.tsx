@@ -19,7 +19,7 @@ export type AdminCategory = { id: number; title: string; color: string | null };
 type Tab = "add" | "match" | "manage";
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "add", label: "Add item" },
+  { key: "add", label: "Add item/category" },
   { key: "match", label: "Run matchup" },
   { key: "manage", label: "Manage / delete" },
 ];

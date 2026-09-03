@@ -1,7 +1,9 @@
-import { eq, inArray, or } from "drizzle-orm";
+import { desc, eq, inArray, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type { TopItem } from "@/lib/rank-data";
 import { deleteById, insertRow, selectAll, selectCount } from "./crud";
-import { assets, eloRecords, items, matches } from "./schema";
+import { getMatchesWithItemTitles } from "./elo";
+import { assets, categories, eloRecords, items, matches } from "./schema";
 
 type NewItem = typeof items.$inferInsert;
 
@@ -47,9 +49,51 @@ export async function getPreviewAssetsForItems(
   db: DrizzleD1Database,
   itemIds: number[],
 ): Promise<{ href: string | null }[]> {
-  return db
+  return await db
     .select({ id: items.id, href: assets.href })
     .from(items)
-    .innerJoin(assets, eq(assets.item_id, items.id))
+    .innerJoin(assets, eq(assets.id, items.preview_asset_id))
     .where(inArray(items.id, itemIds));
+}
+
+export async function getTopItem(db: DrizzleD1Database): Promise<TopItem> {
+  const result = await db
+    .select({
+      id: items.id,
+      title: items.title,
+      description: items.description,
+      category: categories.title,
+      elo: eloRecords.elo,
+      previewAssetHref: assets.href,
+    })
+    .from(items)
+    .innerJoin(eloRecords, eq(eloRecords.item_id, items.id))
+    .orderBy(desc(eloRecords.elo))
+    .limit(1)
+    .leftJoin(categories, eq(items.category_id, categories.id))
+    .leftJoin(assets, eq(assets.id, items.preview_asset_id));
+
+  const topId = result[0].id;
+
+  const recentMatches = await getMatchesWithItemTitles(db, {
+    itemId: topId,
+    limit: 3,
+  });
+
+  const formattedMatches = recentMatches.map((match) => ({
+    label:
+      match.winnerId === topId
+        ? `beat ${match.loser}`
+        : `lost to ${match.winner}`,
+    result: match.winnerId === topId ? "win" : ("loss" as "win" | "loss"),
+  }));
+
+  return {
+    title: result[0].title ?? "Untitled",
+    description: result[0].description ?? "",
+    category: result[0].category ?? "No category",
+    elo: result[0].elo ?? 0,
+    previewAssetHref: result[0].previewAssetHref,
+    matches: formattedMatches,
+  };
 }

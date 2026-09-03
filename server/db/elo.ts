@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { alias } from "drizzle-orm/sqlite-core";
 import {
@@ -165,6 +165,39 @@ export async function getLeaderboard(
 }
 
 /**
+ * Matches with winner/loser titles resolved, newest first. Optionally
+ * filtered to matches involving a specific item.
+ */
+export async function getMatchesWithItemTitles(
+  db: DrizzleD1Database,
+  options: { limit?: number; itemId?: number } = {},
+) {
+  const { limit = 10, itemId } = options;
+
+  const winnerItems = alias(items, "winner_items");
+  const loserItems = alias(items, "loser_items");
+
+  return db
+    .select({
+      winnerId: matches.winner_id,
+      loserId: matches.loser_id,
+      winner: winnerItems.title,
+      loser: loserItems.title,
+      timePlayed: matches.time_played,
+    })
+    .from(matches)
+    .innerJoin(winnerItems, eq(matches.winner_id, winnerItems.id))
+    .innerJoin(loserItems, eq(matches.loser_id, loserItems.id))
+    .where(
+      itemId === undefined
+        ? undefined
+        : or(eq(matches.winner_id, itemId), eq(matches.loser_id, itemId)),
+    )
+    .orderBy(desc(matches.time_played))
+    .limit(limit);
+}
+
+/**
  * Recent matches with winner/loser titles resolved, newest first.
  */
 export async function getRecentActivity(
@@ -172,20 +205,7 @@ export async function getRecentActivity(
   limit: number = 10,
 ) {
   try {
-    const winnerItems = alias(items, "winner_items");
-    const loserItems = alias(items, "loser_items");
-
-    const rows = await db
-      .select({
-        winner: winnerItems.title,
-        loser: loserItems.title,
-        timePlayed: matches.time_played,
-      })
-      .from(matches)
-      .innerJoin(winnerItems, eq(matches.winner_id, winnerItems.id))
-      .innerJoin(loserItems, eq(matches.loser_id, loserItems.id))
-      .orderBy(desc(matches.time_played))
-      .limit(limit);
+    const rows = await getMatchesWithItemTitles(db, { limit });
 
     return rows.map((row) => ({
       winner: row.winner ?? "Untitled",
