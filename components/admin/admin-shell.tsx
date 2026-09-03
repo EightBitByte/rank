@@ -68,7 +68,9 @@ export function AdminShell({
       </nav>
 
       {tab === "add" && <AddItemPanel categories={categories} />}
-      {tab === "match" && <MatchupPanel items={items} />}
+      {tab === "match" && (
+        <MatchupPanel items={items} categories={categories} />
+      )}
       {tab === "manage" && (
         <ManagePanel items={items} categories={categories} />
       )}

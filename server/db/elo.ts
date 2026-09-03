@@ -143,6 +143,7 @@ export async function getLeaderboard(
         title: items.title,
         elo: eloRecords.elo,
         category: categories.title,
+        categoryColor: categories.color,
         previewAssetHref: assets.href,
       })
       .from(items)
@@ -156,6 +157,7 @@ export async function getLeaderboard(
       rank: index + 1,
       title: row.title ?? "Untitled",
       category: row.category ?? "Uncategorized",
+      categoryColor: row.categoryColor,
       elo: Math.round(row.elo),
       previewAssetHref: row.previewAssetHref,
     }));

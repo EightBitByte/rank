@@ -5,7 +5,7 @@ import { useState } from "react";
 import { voteAction } from "@/app/admin/actions";
 import { CategoryTag } from "@/components/ui/category-tag";
 import { PlaceholderThumbnail } from "@/components/ui/placeholder-thumbnail";
-import type { AdminItem } from "./admin-shell";
+import type { AdminCategory, AdminItem } from "./admin-shell";
 
 function pickTwoRandomIds(items: AdminItem[]): [number, number] | null {
   if (items.length < 2) return null;
@@ -15,7 +15,13 @@ function pickTwoRandomIds(items: AdminItem[]): [number, number] | null {
   return [items[a].id, items[b].id];
 }
 
-export function MatchupPanel({ items }: { items: AdminItem[] }) {
+export function MatchupPanel({
+  items,
+  categories,
+}: {
+  items: AdminItem[];
+  categories: AdminCategory[];
+}) {
   const [matchIds, setMatchIds] = useState<[number, number] | null>(() =>
     pickTwoRandomIds(items),
   );
@@ -73,6 +79,7 @@ export function MatchupPanel({ items }: { items: AdminItem[] }) {
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-5">
         <MatchCard
           item={itemA}
+          categories={categories}
           picked={picked === itemA.id}
           disabled={voting}
           onPick={() => pickWinner(itemA.id, itemB.id)}
@@ -80,6 +87,7 @@ export function MatchupPanel({ items }: { items: AdminItem[] }) {
         <div className="font-display text-xl font-black opacity-25">VS</div>
         <MatchCard
           item={itemB}
+          categories={categories}
           picked={picked === itemB.id}
           disabled={voting}
           onPick={() => pickWinner(itemB.id, itemA.id)}
@@ -97,15 +105,19 @@ export function MatchupPanel({ items }: { items: AdminItem[] }) {
 
 function MatchCard({
   item,
+  categories,
   picked,
   disabled,
   onPick,
 }: {
   item: AdminItem;
+  categories: AdminCategory[];
   picked: boolean;
   disabled: boolean;
   onPick: () => void;
 }) {
+  const category = categories.find((c) => c.id === item.categoryId);
+
   return (
     <button
       type="button"
@@ -127,7 +139,10 @@ function MatchCard({
       ) : (
         <PlaceholderThumbnail className="h-10 w-10 shrink-0 rounded-lg" dense />
       )}
-      <CategoryTag category={item.category} />
+      <CategoryTag
+        category={category?.title ?? item.category}
+        color={category?.color}
+      />
       <div className="font-display text-xl font-extrabold">{item.title}</div>
       <div className="font-display text-[15px] font-extrabold opacity-50">
         {item.elo} elo

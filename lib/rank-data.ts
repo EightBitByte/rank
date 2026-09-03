@@ -11,6 +11,7 @@ export type LeaderboardItem = {
   rank: number;
   title: string;
   category: string;
+  categoryColor: string | null;
   elo: number;
   previewAssetHref: string | null;
 };

@@ -38,7 +38,7 @@ function LeaderboardRow({ item }: { item: LeaderboardItem }) {
           {item.title}
         </div>
         <div className="mt-1 inline-block">
-          <CategoryTag category={item.category} />
+          <CategoryTag category={item.category} color={item.categoryColor} />
         </div>
       </div>
       <div className="font-display text-lg font-extrabold">{item.elo}</div>
