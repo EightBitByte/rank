@@ -15,7 +15,12 @@ export type AdminItem = {
   previewAssetHref: string | null;
 };
 
-export type AdminCategory = { id: number; title: string; color: string | null };
+export type AdminCategory = {
+  id: number;
+  title: string;
+  color: string | null;
+  locked: boolean;
+};
 
 type Tab = "add" | "match" | "manage";
 

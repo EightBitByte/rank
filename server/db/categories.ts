@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import {
   deleteById,
@@ -16,6 +17,17 @@ export function createCategory(db: DrizzleD1Database, data: NewCategory) {
 
 export function getAllCategories(db: DrizzleD1Database) {
   return selectAll(db, categories);
+}
+
+export async function getCategoryById(
+  db: DrizzleD1Database,
+  categoryId: number,
+) {
+  const [category] = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.id, categoryId));
+  return category;
 }
 
 export function deleteCategory(db: DrizzleD1Database, categoryId: number) {

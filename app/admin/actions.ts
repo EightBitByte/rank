@@ -8,6 +8,7 @@ import { createAsset } from "@/server/db/assets";
 import {
   createCategory,
   deleteCategory,
+  getCategoryById,
   updateCategory,
 } from "@/server/db/categories";
 import { getDb } from "@/server/db/crud";
@@ -94,8 +95,13 @@ export async function updateCategoryAction(input: {
   const title = input.title.trim();
   if (!title) throw new Error("Category name can't be empty.");
 
+  const existing = await getCategoryById(database, input.categoryId);
+  if (existing?.locked && existing.title !== title) {
+    throw new Error("Built-in categories can't be renamed.");
+  }
+
   const category = await updateCategory(database, input.categoryId, {
-    title,
+    title: existing?.locked ? existing.title : title,
     color: input.color,
   });
   revalidatePath("/admin");
@@ -105,6 +111,10 @@ export async function updateCategoryAction(input: {
 export async function deleteCategoryAction(categoryId: number) {
   await requireAdmin();
   const { db: database } = getDb();
+
+  const existing = await getCategoryById(database, categoryId);
+  if (existing?.locked) throw new Error("This category can't be deleted.");
+
   await database
     .update(items)
     .set({ category_id: null })

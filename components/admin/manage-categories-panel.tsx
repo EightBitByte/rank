@@ -96,6 +96,11 @@ export function ManageCategoriesPanel({
               <div className="font-display text-[15px] font-extrabold opacity-60">
                 {itemCountFor(category.id)}
               </div>
+              {category.locked && (
+                <span className="rounded-full bg-black/[0.06] px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-[0.4px] opacity-50">
+                  Built-in
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => startEdit(category)}
@@ -117,25 +122,34 @@ export function ManageCategoriesPanel({
                   <path d="m15 5 4 4" />
                 </svg>
               </button>
-              <button
-                type="button"
-                disabled={deletingId === category.id}
-                onClick={() => handleDelete(category)}
-                className="cursor-pointer rounded-full bg-red-600/10 px-4 py-2 font-display text-[13px] font-bold text-red-600 disabled:opacity-50"
-              >
-                {deletingId === category.id ? "Deleting…" : "Delete"}
-              </button>
+              {!category.locked && (
+                <button
+                  type="button"
+                  disabled={deletingId === category.id}
+                  onClick={() => handleDelete(category)}
+                  className="cursor-pointer rounded-full bg-red-600/10 px-4 py-2 font-display text-[13px] font-bold text-red-600 disabled:opacity-50"
+                >
+                  {deletingId === category.id ? "Deleting…" : "Delete"}
+                </button>
+              )}
             </div>
 
             {editingId === category.id && editDraft && (
               <div className="flex flex-col gap-3 border-b border-black/[0.06] bg-black/[0.02] px-[22px] pt-3.5 pb-5 last:border-b-0">
-                <input
-                  value={editDraft.title}
-                  onChange={(e) =>
-                    setEditDraft({ ...editDraft, title: e.target.value })
-                  }
-                  className="rounded-[10px] border border-black/[0.12] px-3.5 py-2.5 font-sans text-sm outline-none"
-                />
+                {category.locked ? (
+                  <p className="text-sm opacity-50">
+                    Built-in categories can't be renamed, but you can still
+                    change the color.
+                  </p>
+                ) : (
+                  <input
+                    value={editDraft.title}
+                    onChange={(e) =>
+                      setEditDraft({ ...editDraft, title: e.target.value })
+                    }
+                    className="rounded-[10px] border border-black/[0.12] px-3.5 py-2.5 font-sans text-sm outline-none"
+                  />
+                )}
                 <div className="flex items-center gap-2.5">
                   {CATEGORY_COLOR_SWATCHES.map((swatch) => (
                     <button

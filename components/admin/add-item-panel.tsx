@@ -110,14 +110,15 @@ export function AddItemPanel({
   }
 
   function addFromResult(result: TmdbSearchResult) {
-    const movieCategoryId =
-      categories.find((c) => c.title === "Movies & TV")?.id ??
+    const wantedTitle = result.mediaType === "movie" ? "Movies" : "TV";
+    const categoryId =
+      categories.find((c) => c.title === wantedTitle)?.id ??
       categories[0]?.id ??
       null;
 
     setDraft({
       title: result.title,
-      categoryId: movieCategoryId,
+      categoryId,
       elo: "1200",
       meta: result.meta,
       notes: "",

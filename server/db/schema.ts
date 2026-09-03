@@ -10,6 +10,9 @@ export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey(),
   title: text("title").notNull(),
   color: text("color"),
+  // Hardcoded categories (Movies, TV) that back the built-in API sources —
+  // can't be renamed or deleted from the admin UI.
+  locked: integer("locked", { mode: "boolean" }).notNull().default(false),
 });
 
 export const assets = sqliteTable("assets", {
